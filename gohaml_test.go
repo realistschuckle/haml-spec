@@ -1,6 +1,7 @@
 package gohaml_test
 
 import (
+	"errors"
 	"encoding/json"
 	"github.com/realistschuckle/gohaml"
 	"os"
@@ -27,6 +28,33 @@ func replaceNewlines(val string) (new string) {
 	return
 }
 
+func str2bool(s string) (b bool, err error) {
+	switch s {
+	case "true":
+		b = true
+	case "false":
+		b = false
+	default:
+		err = errors.New("Unknown bool value: " + s)
+	}
+	return
+}
+
+func mergeConfig(config map[string]string) (options gohaml.EngineOptions, err error) {
+	options = gohaml.DefaultEngineOptions()
+	if config != nil {
+		for name, val := range config {
+			switch name {
+			case "escape_html":
+				options.EscapeHtml, err = str2bool(val)
+			case "format":
+				options.Format = val
+			}
+		}
+	}
+	return
+}
+
 func TestSpecifications(t *testing.T) {
 	var file *os.File
 	var err error
@@ -43,19 +71,19 @@ func TestSpecifications(t *testing.T) {
 	}
 
 	res := results{}
-	emptyScope := make(map[string]interface{})
 	for categoryName := range tests {
 		t.Log(categoryName)
 		for testName, test := range tests[categoryName] {
-			if engine, err := gohaml.NewEngine(test.Haml); err != nil {
-				t.Error(err.Error())
+			var opts gohaml.EngineOptions
+			var err error
+			if opts, err = mergeConfig(test.Config); err != nil {
+				t.Fatalf("\t%v\n", err.Error())
+			}
+			if engine, err := gohaml.NewEngine(test.Haml, &opts); err != nil {
+				t.Errorf("  ERROR IN '%s': %s\n", testName, err.Error())
 				res.failed += 1
 			} else {
-				scope := emptyScope
-				if test.Locals != nil {
-					scope = test.Locals
-				}
-				if output := engine.Render(scope); output != test.Html {
+				if output, _ := engine.Render(test.Locals); output != test.Html {
 					t.Errorf("  %s\n", testName)
 					t.Errorf("    input   : %s\n", replaceNewlines(test.Haml))
 					t.Errorf("    expected: %s\n", replaceNewlines(test.Html))
