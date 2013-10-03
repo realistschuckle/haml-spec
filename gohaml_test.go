@@ -1,8 +1,8 @@
 package gohaml_test
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 	"github.com/realistschuckle/gohaml"
 	"os"
 	"strings"
