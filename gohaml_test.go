@@ -83,13 +83,18 @@ func TestSpecifications(t *testing.T) {
 				t.Errorf("  ERROR IN '%s': %s\n", testName, err.Error())
 				res.failed += 1
 			} else {
-				if output, _ := engine.Render(test.Locals); output != test.Html {
+				output, err := engine.Render(test.Locals)
+				switch {
+				case err != nil:
+					t.Errorf("  ERROR IN '%s': %s\n", testName, err.Error())
+					res.failed += 1
+				case output != test.Html:
 					t.Errorf("  %s\n", testName)
 					t.Errorf("    input   : %s\n", replaceNewlines(test.Haml))
 					t.Errorf("    expected: %s\n", replaceNewlines(test.Html))
 					t.Errorf("    got     : %s\n", replaceNewlines(output))
 					res.failed += 1
-				} else {
+				default:
 					res.passed += 1
 				}
 			}
