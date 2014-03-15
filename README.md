@@ -58,6 +58,16 @@ The Lua test depends on
 [Lua Haml](http://github.com/norman/lua-haml). Install and run `tsc
 lua_haml_spec.lua`.
 
+### Go ###
+
+The Go test depends on
+[gohaml](http://github.com/realistschuckle/gohaml). You'll need to get it with
+it
+
+     go get github.com/realistschuckle/gohaml
+
+Then you can run it using `go test`.
+
 ### Getting it ###
 
 You can access the [Git repository](http://github.com/norman/haml-spec) at:
