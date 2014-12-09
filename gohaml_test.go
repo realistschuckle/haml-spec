@@ -72,7 +72,7 @@ func TestSpecifications(t *testing.T) {
 
 	res := results{}
 	for categoryName := range tests {
-		t.Log(categoryName)
+		failed := false
 		for testName, test := range tests[categoryName] {
 			var opts gohaml.EngineOptions
 			var err error
@@ -89,6 +89,10 @@ func TestSpecifications(t *testing.T) {
 					t.Errorf("  ERROR IN '%s': %s\n", testName, err.Error())
 					res.failed += 1
 				case output != test.Html:
+					if !failed {
+						failed = true
+						t.Log(categoryName)
+					}
 					t.Errorf("  %s\n", testName)
 					t.Errorf("    input   : %s\n", replaceNewlines(test.Haml))
 					t.Errorf("    expected: %s\n", replaceNewlines(test.Html))
